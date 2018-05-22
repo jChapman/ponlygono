@@ -1,0 +1,1 @@
+Polygono - A library for the creation and modification of polygons
