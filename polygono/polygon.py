@@ -1,25 +1,59 @@
 from typing import List, Tuple, Iterator
 from dataclasses import dataclass
+from itertools import combinations
 
 @dataclass
-class Point: 
+class Point:
     x: int
     y: int
 
-@dataclass
-class Line: 
-    first_point: Point
-    second_point: Point
+    __epsilon = 0.00001
 
-class Polygon: 
+    def __eq__(self, other: 'Point') -> bool:
+        x_diff = self.x - other.x
+        y_diff = self.y - other.y
+        x_diff *= x_diff
+        y_diff *= y_diff
+
+        return x_diff < self.__epsilon and y_diff < self.__epsilon
+
+    def __neq__(self, other: 'Point') -> bool:
+        return not self.__eq__(other)
+
+@dataclass
+class Line:
+    p1: Point
+    p2: Point
+
+    # https://stackoverflow.com/a/39592579
+    def intersects(self, other: 'Line') -> bool:
+        denom = (other.p2.y - other.p1.y) * (self.p2.x - self.p1.x) - (other.p2.x - other.p1.x) * (self.p2.y - self.p1.y)
+        if denom == 0:
+            return False
+
+        n_a = (other.p2.x - other.p1.x) * (self.p1.y - other.p1.y) - (other.p2.y - other.p1.y) * (self.p1.x - other.p1.x)
+        n_b = (self.p2.x - self.p1.x) * (self.p1.y - other.p1.y) - (self.p2.y - self.p1.y) * (self.p1.x - other.p1.x)
+        ua = n_a / denom
+        ub = n_b / denom
+
+        if ua >= 0.0 and ua <= 1.0 and ub >= 0.0 and ub <= 1.0:
+            intersection = Point(self.p1.x + (ua * (self.p2.x - self.p1.x)), self.p1.y + (ua * (self.p2.y - self.p1.y)))
+            if intersection in [self.p1, self.p2, other.p1, other.p2]:
+                return False
+            return True
+        return False
+
+
+
+class Polygon:
     verts: List[Point]
 
     def __init__(self, points:List[Tuple[int, int]]) -> None:
         if len(points) < 3 or len(points) != len(set(points)):
             raise ValueError('Invalid points!')
-        
+
         self.verts = [Point(p[0], p[1]) for p in points]
-    
+
     def outline(self) -> Iterator[Line]:
         itr = iter(self.verts)
         first = prev = item = next(itr)
@@ -27,7 +61,15 @@ class Polygon:
             yield Line(prev, item)
             prev = item
         yield Line(item, first)
-    
+
+    def is_self_intersecting(self) -> bool:
+        for line, other_line in combinations(self.outline(), 2):
+            if line.intersects(other_line):
+                print('Intersection found between {} and {}'.format(line, other_line))
+                return True
+
+        return False
+
     # https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
     def point_inside(self, point: Tuple[int, int]) -> bool:
         x, y = point
@@ -43,4 +85,4 @@ class Polygon:
 
         return contains
 
-    
+
