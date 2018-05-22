@@ -1,2 +1,7 @@
 dist
 MANIFEST
+build
+.mypy_cache
+.vscode
+.pytest_cache
+__pycache__
