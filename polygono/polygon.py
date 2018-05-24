@@ -21,12 +21,15 @@ class Point:
         return not self.__eq__(other)
 
 @dataclass
-class Line:
+class LineSeg:
     p1: Point
     p2: Point
 
     # https://stackoverflow.com/a/39592579
-    def intersects(self, other: 'Line') -> bool:
+    def intersects(self, other: 'LineSeg') -> bool:
+        if self == other:
+            return True
+
         denom = (other.p2.y - other.p1.y) * (self.p2.x - self.p1.x) - (other.p2.x - other.p1.x) * (self.p2.y - self.p1.y)
         if denom == 0:
             return False
@@ -38,10 +41,20 @@ class Line:
 
         if ua >= 0.0 and ua <= 1.0 and ub >= 0.0 and ub <= 1.0:
             intersection = Point(self.p1.x + (ua * (self.p2.x - self.p1.x)), self.p1.y + (ua * (self.p2.y - self.p1.y)))
-            if intersection in [self.p1, self.p2, other.p1, other.p2]:
+            # If they share a point and intersect at that point then everything's cool
+            if intersection in [self.p1, self.p2] and intersection in [other.p1, other.p2]:
                 return False
             return True
         return False
+    
+    def point_along(self, percent_along: float) -> Point:
+        if percent_along < 0 or percent_along > 1:
+            raise ValueError('Invalid percent_along (must be between 0 and 1 inclusive)')
+        
+        x_total = (self.p2.x - self.p1.x) * percent_along 
+        y_total = (self.p2.y - self.p1.y) * percent_along 
+
+        return Point(self.p1.x + x_total, self.p1.y + y_total)
 
 
 
@@ -54,18 +67,18 @@ class Polygon:
 
         self.verts = [Point(p[0], p[1]) for p in points]
 
-    def outline(self) -> Iterator[Line]:
+    def outline(self) -> Iterator[LineSeg]:
         itr = iter(self.verts)
         first = prev = item = next(itr)
         for item in itr:
-            yield Line(prev, item)
+            yield LineSeg(prev, item)
             prev = item
-        yield Line(item, first)
+        yield LineSeg(item, first)
 
     def is_self_intersecting(self) -> bool:
         for line, other_line in combinations(self.outline(), 2):
             if line.intersects(other_line):
-                print('Intersection found between {} and {}'.format(line, other_line))
+                #print('Intersection found between {} and {}'.format(line, other_line))
                 return True
 
         return False
