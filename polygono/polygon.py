@@ -1,6 +1,7 @@
 from typing import List, Tuple, Iterator
 from dataclasses import dataclass
 from itertools import combinations
+import math
 
 @dataclass
 class Point:
@@ -10,6 +11,8 @@ class Point:
     __epsilon = 0.00001
 
     def __eq__(self, other: 'Point') -> bool:
+        if other is None:
+            return False
         x_diff = self.x - other.x
         y_diff = self.y - other.y
         x_diff *= x_diff
@@ -19,6 +22,24 @@ class Point:
 
     def __neq__(self, other: 'Point') -> bool:
         return not self.__eq__(other)
+    
+    def distance_to(self, other: 'Point') -> float:
+        x_diff = self.x - other.x
+        y_diff = self.y - other.y
+        return math.sqrt(x_diff*x_diff + y_diff*y_diff)
+
+@dataclass
+class Line:
+    p: Point
+    slope: float
+
+    @property
+    def y_intercept(self) -> float:
+        if self.slope == math.inf or self.slope == -math.inf:
+            if self.p.x == 0:
+                return math.inf
+            return None
+        return self.p.y - self.slope * self.p.x
 
 @dataclass
 class LineSeg:
@@ -56,14 +77,15 @@ class LineSeg:
 
         return Point(self.p1.x + x_total, self.p1.y + y_total)
 
-
+    def length(self) -> float:
+        return self.p1.distance_to(self.p2)
 
 class Polygon:
     verts: List[Point]
 
     def __init__(self, points:List[Tuple[int, int]]) -> None:
         if len(points) < 3 or len(points) != len(set(points)):
-            raise ValueError('Invalid points!')
+            raise ValueError('Invalid points! Polygon will close the polygon for you (no need to repeat first point as last')
 
         self.verts = [Point(p[0], p[1]) for p in points]
 
