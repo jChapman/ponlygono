@@ -35,11 +35,55 @@ class Line:
 
     @property
     def y_intercept(self) -> float:
-        if self.slope == math.inf or self.slope == -math.inf:
+        if math.isinf(self.slope):
             if self.p.x == 0:
                 return math.inf
             return None
         return self.p.y - self.slope * self.p.x
+
+    def point_is_on(self, point: Point) -> bool:
+        if point == self.p: 
+            return True
+        x_diff = point.x - self.p.x
+        if x_diff == 0:
+            return math.isinf(self.slope)
+        return self.slope == (point.y - self.p.y) / x_diff
+
+    def intersection_point(self, other: 'Line') -> Point:
+        if self.is_parallel_to(other):
+            # TODO this will return None if they are the same line, what is the correct value to return there? 
+            return None
+        x = (self.y_intercept - other.y_intercept) / (self.slope - other.slope) 
+        return Point(x, self.slope * x + self.y_intercept)
+    
+    def is_parallel_to(self, other: 'Line') -> bool:
+        if math.isinf(self.slope):
+            return math.isinf(other.slope)
+        return other.slope == self.slope
+    
+    def create_parallel_line(self, point: Point) -> 'Line':
+        return Line(point, self.slope)
+    
+    def create_line_segment_of_length(self, length:float, point:Point = None) -> 'LineSeg':
+        if point is None:
+            point = self.p
+        if not self.point_is_on(point):
+            raise ValueError('Point must be on the line!')
+
+        half_distance = length/2
+
+        if math.isinf(self.slope):
+            return LineSeg(Point(point.x, point.y + half_distance), Point(point.x, point.y-half_distance))
+        
+        #x_part = math.sqrt(half_distance*half_distance * (self.slope * self.slope + 1)) 
+        #x1 = (x_part + self.slope * self.slope * point.x + point.x) / (self.slope * self.slope + 1)
+        #x2 = (-x_part + self.slope * self.slope * point.x + point.x) / (self.slope * self.slope + 1)
+        
+        x_part = half_distance / math.sqrt(1 + self.slope*self.slope)
+        x1 = point.x - x_part
+        x2 = point.x + x_part
+        return LineSeg(Point(x1, self.slope*x1 + self.y_intercept), Point(x2, self.slope*x2 + self.y_intercept))
+
 
 @dataclass
 class LineSeg:
