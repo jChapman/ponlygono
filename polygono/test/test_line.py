@@ -101,3 +101,26 @@ def test_create_line_seg_vert_horr():
     points = (Point(0, 5), Point(0, -5))
     assert seg.p1 in points
     assert seg.p2 in points
+
+def test_cant_make_perpendicular_if_co_linear():
+    l = Line(Point(0,0), 0)
+    assert l.create_line_perpendicular(Point(10, 0)) is None
+
+def test_make_perpendicular():
+    l = Line(Point(0,0), 0)
+    perp_point = Point(0, 10)
+    perp = l.create_line_perpendicular(perp_point)
+    assert perp.slope == math.inf
+    assert perp.p == perp_point
+
+    l.slope = math.inf
+    perp_point = Point(10, 0)
+    perp = l.create_line_perpendicular(perp_point)
+    assert perp.slope == 0
+    assert perp.p == perp_point
+
+    l.slope = 1
+    perp_point = Point(-10, 10)
+    perp = l.create_line_perpendicular(perp_point)
+    assert perp.slope == -1
+    assert perp.p == perp_point

@@ -83,6 +83,19 @@ class Line:
         x1 = point.x - x_part
         x2 = point.x + x_part
         return LineSeg(Point(x1, self.slope*x1 + self.y_intercept), Point(x2, self.slope*x2 + self.y_intercept))
+    
+    def create_line_perpendicular(self, point:Point) -> 'Line':
+        if self.point_is_on(point):
+            return None
+        slope = self.slope
+        if math.isinf(self.slope):
+            slope = 0
+        elif self.slope == 0:
+            slope = math.inf
+        else:
+            slope = -1/self.slope
+
+        return Line(point, slope)
 
 
 @dataclass
