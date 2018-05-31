@@ -36,6 +36,8 @@ class Line:
     p: Point
     slope: float
 
+    __epsilon = 0.00001
+
     @property
     def y_intercept(self) -> float:
         if math.isinf(self.slope):
@@ -89,7 +91,7 @@ class Line:
         slope = self.slope
         if math.isinf(self.slope):
             slope = 0
-        elif self.slope == 0:
+        elif abs(self.slope) < self.__epsilon:
             slope = math.inf
         else:
             slope = -1/self.slope
