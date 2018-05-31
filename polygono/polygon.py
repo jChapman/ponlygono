@@ -27,6 +27,9 @@ class Point:
         x_diff = self.x - other.x
         y_diff = self.y - other.y
         return math.sqrt(x_diff*x_diff + y_diff*y_diff)
+    
+    def unpack(self):
+        return self.x, self.y
 
 @dataclass
 class Line:
@@ -100,13 +103,10 @@ class LineSeg:
     p2: Point
 
     # https://stackoverflow.com/a/39592579
-    def intersects(self, other: 'LineSeg') -> bool:
-        if self == other:
-            return True
-
+    def intersection_point(self, other: 'LineSeg') -> Point:
         denom = (other.p2.y - other.p1.y) * (self.p2.x - self.p1.x) - (other.p2.x - other.p1.x) * (self.p2.y - self.p1.y)
         if denom == 0:
-            return False
+            return None
 
         n_a = (other.p2.x - other.p1.x) * (self.p1.y - other.p1.y) - (other.p2.y - other.p1.y) * (self.p1.x - other.p1.x)
         n_b = (self.p2.x - self.p1.x) * (self.p1.y - other.p1.y) - (self.p2.y - self.p1.y) * (self.p1.x - other.p1.x)
@@ -114,12 +114,20 @@ class LineSeg:
         ub = n_b / denom
 
         if ua >= 0.0 and ua <= 1.0 and ub >= 0.0 and ub <= 1.0:
-            intersection = Point(self.p1.x + (ua * (self.p2.x - self.p1.x)), self.p1.y + (ua * (self.p2.y - self.p1.y)))
-            # If they share a point and intersect at that point then everything's cool
-            if intersection in [self.p1, self.p2] and intersection in [other.p1, other.p2]:
-                return False
+            return Point(self.p1.x + (ua * (self.p2.x - self.p1.x)), self.p1.y + (ua * (self.p2.y - self.p1.y)))
+        return None
+
+    def intersects(self, other: 'LineSeg') -> bool:
+        if self == other:
             return True
-        return False
+        intersection = self.intersection_point(other)
+        if intersection is None:
+            return False
+        # If they share a point and intersect at that point then everything's cool
+        if intersection in [self.p1, self.p2] and intersection in [other.p1, other.p2]:
+            return False
+        return True
+
     
     def point_along(self, percent_along: float) -> Point:
         if percent_along < 0 or percent_along > 1:
@@ -129,7 +137,20 @@ class LineSeg:
         y_total = (self.p2.y - self.p1.y) * percent_along 
 
         return Point(self.p1.x + x_total, self.p1.y + y_total)
+    
+    def step_along(self, distance:float) -> Point:
+        length = self.length
+        if distance > length:
+            return None
+        elif distance == length:
+            return self.p2
+        t = distance / length
+        x = (1-t) * self.p1.x + t * self.p2.x
+        y = (1-t) * self.p1.y + t * self.p2.y
+        return Point(x, y)
+        
 
+    @property
     def length(self) -> float:
         return self.p1.distance_to(self.p2)
 
@@ -176,4 +197,15 @@ class Polygon:
 class Rect(Polygon): 
 
     def __init__(self, upper_left:Point, lower_right:Point=None, width:float=None, height:float=None):
-        super().__init__(None)
+        if upper_left and lower_right and (width or height):
+            raise ValueError('Too many params! Either pass two points or a single point with width and height')
+        if upper_left and lower_right:
+            super().__init__([upper_left, Point(upper_left.x, lower_right.y), lower_right, Point(lower_right.x, upper_left.y)])
+            self.width = abs(upper_left.x - lower_right.x)
+            self.height = abs(upper_left.y - lower_right.y)
+        elif width and height:
+            super().__init__([upper_left, Point(upper_left.x, upper_left.y+height), Point(upper_left.x+width, upper_left.y+width), Point(upper_left.x+width, upper_left.y)])
+            self.width = width
+            self.height = height
+    
+

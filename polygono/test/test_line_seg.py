@@ -60,8 +60,21 @@ def test_half_along_is_half_y_axis():
 
 def test_line_length_hor():
     l = LineSeg(Point(0, 0), Point(100, 0))
-    assert l.length() == 100
+    assert l.length == 100
 
 def test_line_length_vert():
     l = LineSeg(Point(0, 0), Point(0, 50))
-    assert l.length() == 50
+    assert l.length == 50
+
+def test_step_too_far_is_none():
+    l = LineSeg(Point(0, 0), Point(0, 50))
+    assert l.step_along(51) is None
+
+def test_step_for_dist_is_second_point():
+    p2 = Point(0, 50)
+    l = LineSeg(Point(0, 0), p2)
+    assert l.step_along(l.length) is p2
+
+def test_step_along():
+    l = LineSeg(Point(0, 0), Point(0, 50))
+    assert l.step_along(10) == Point(0, 10)

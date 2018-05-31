@@ -80,7 +80,7 @@ def test_create_line_seg():
     l = Line(Point(0,0), 3/4)
     length = 10
     seg = l.create_line_segment_of_length(length)
-    assert seg.length() == length
+    assert seg.length == length
     points = (Point(4, 3), Point(-4, -3))
     assert seg.p1 in points
     assert seg.p2 in points
@@ -89,7 +89,7 @@ def test_create_line_seg_vert_horr():
     l = Line(Point(0,0), 0)
     length = 10
     seg = l.create_line_segment_of_length(length)
-    assert seg.length() == length
+    assert seg.length == length
     points = (Point(5, 0), Point(-5, 0))
     assert seg.p1 in points
     assert seg.p2 in points
@@ -97,7 +97,7 @@ def test_create_line_seg_vert_horr():
     l.slope = math.inf
     length = 10
     seg = l.create_line_segment_of_length(length)
-    assert seg.length() == length
+    assert seg.length == length
     points = (Point(0, 5), Point(0, -5))
     assert seg.p1 in points
     assert seg.p2 in points
