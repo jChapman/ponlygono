@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from itertools import combinations
 import math
 
-@dataclass
+@dataclass(frozen=True)
 class Point:
     x: int
     y: int
@@ -75,10 +75,6 @@ class Line:
         if math.isinf(self.slope):
             return LineSeg(Point(point.x, point.y + half_distance), Point(point.x, point.y-half_distance))
         
-        #x_part = math.sqrt(half_distance*half_distance * (self.slope * self.slope + 1)) 
-        #x1 = (x_part + self.slope * self.slope * point.x + point.x) / (self.slope * self.slope + 1)
-        #x2 = (-x_part + self.slope * self.slope * point.x + point.x) / (self.slope * self.slope + 1)
-        
         x_part = half_distance / math.sqrt(1 + self.slope*self.slope)
         x1 = point.x - x_part
         x2 = point.x + x_part
@@ -140,11 +136,11 @@ class LineSeg:
 class Polygon:
     verts: List[Point]
 
-    def __init__(self, points:List[Tuple[int, int]]) -> None:
+    def __init__(self, points:List[Point]) -> None:
         if len(points) < 3 or len(points) != len(set(points)):
             raise ValueError('Invalid points! Polygon will close the polygon for you (no need to repeat first point as last')
 
-        self.verts = [Point(p[0], p[1]) for p in points]
+        self.verts = points
 
     def outline(self) -> Iterator[LineSeg]:
         itr = iter(self.verts)
@@ -163,14 +159,13 @@ class Polygon:
         return False
 
     # https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
-    def point_inside(self, point: Tuple[int, int]) -> bool:
-        x, y = point
+    def point_inside(self, point: Point) -> bool:
         num_verts = len(self.verts)
         i = 0
         j = num_verts - 1
         contains = False
         while i < num_verts:
-            if (self.verts[i].y > y) != (self.verts[j].y > y) and (x  < (self.verts[j].x - self.verts[i].x) * (y - self.verts[i].y) / (self.verts[j].y - self.verts[i].y) + self.verts[i].x):
+            if (self.verts[i].y > point.y) != (self.verts[j].y > point.y) and (point.x  < (self.verts[j].x - self.verts[i].x) * (point.y - self.verts[i].y) / (self.verts[j].y - self.verts[i].y) + self.verts[i].x):
                 contains = not contains
             j = i
             i += 1
@@ -178,3 +173,7 @@ class Polygon:
         return contains
 
 
+class Rect(Polygon): 
+
+    def __init__(self, upper_left:Point, lower_right:Point=None, width:float=None, height:float=None):
+        super().__init__(None)
