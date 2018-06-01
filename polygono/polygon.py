@@ -1,12 +1,13 @@
-from typing import List, Tuple, Iterator
+from typing import List, Iterator
 from dataclasses import dataclass
 from itertools import combinations
 import math
 
+
 @dataclass(frozen=True)
 class Point:
-    x: int
-    y: int
+    x: float
+    y: float
 
     __epsilon = 0.00001
 
@@ -30,6 +31,7 @@ class Point:
     
     def unpack(self):
         return self.x, self.y
+
 
 @dataclass
 class Line:
@@ -69,7 +71,7 @@ class Line:
     def create_parallel_line(self, point: Point) -> 'Line':
         return Line(point, self.slope)
     
-    def create_line_segment_of_length(self, length:float, point:Point = None) -> 'LineSeg':
+    def create_line_segment_of_length(self, length: float, point: Point = None) -> 'LineSeg':
         if point is None:
             point = self.p
         if not self.point_is_on(point):
@@ -88,7 +90,6 @@ class Line:
     def create_line_perpendicular(self, point:Point) -> 'Line':
         if self.point_is_on(point):
             return None
-        slope = self.slope
         if math.isinf(self.slope):
             slope = 0
         elif abs(self.slope) < self.__epsilon:
@@ -115,7 +116,7 @@ class LineSeg:
         ua = n_a / denom
         ub = n_b / denom
 
-        if ua >= 0.0 and ua <= 1.0 and ub >= 0.0 and ub <= 1.0:
+        if 0.0 <= ua <= 1.0 and 0.0 <= ub <= 1.0:
             return Point(self.p1.x + (ua * (self.p2.x - self.p1.x)), self.p1.y + (ua * (self.p2.y - self.p1.y)))
         return None
 
@@ -130,7 +131,6 @@ class LineSeg:
             return False
         return True
 
-    
     def point_along(self, percent_along: float) -> Point:
         if percent_along < 0 or percent_along > 1:
             raise ValueError('Invalid percent_along (must be between 0 and 1 inclusive)')
@@ -140,7 +140,7 @@ class LineSeg:
 
         return Point(self.p1.x + x_total, self.p1.y + y_total)
     
-    def step_along(self, distance:float) -> Point:
+    def step_along(self, distance: float) -> Point:
         length = self.length
         if distance > length:
             return None
@@ -151,15 +151,15 @@ class LineSeg:
         y = (1-t) * self.p1.y + t * self.p2.y
         return Point(x, y)
         
-
     @property
     def length(self) -> float:
         return self.p1.distance_to(self.p2)
 
+
 class Polygon:
     verts: List[Point]
 
-    def __init__(self, points:List[Point]) -> None:
+    def __init__(self, points: List[Point]) -> None:
         if len(points) < 3 or len(points) != len(set(points)):
             raise ValueError('Invalid points! Polygon will close the polygon for you (no need to repeat first point as last')
 
@@ -176,7 +176,7 @@ class Polygon:
     def is_self_intersecting(self) -> bool:
         for line, other_line in combinations(self.outline(), 2):
             if line.intersects(other_line):
-                #print('Intersection found between {} and {}'.format(line, other_line))
+                # print('Intersection found between {} and {}'.format(line, other_line))
                 return True
 
         return False
@@ -198,7 +198,7 @@ class Polygon:
 
 class Rect(Polygon): 
 
-    def __init__(self, upper_left:Point, lower_right:Point=None, width:float=None, height:float=None):
+    def __init__(self, upper_left: Point, lower_right: Point=None, width: float=None, height: float=None):
         if upper_left and lower_right and (width or height):
             raise ValueError('Too many params! Either pass two points or a single point with width and height')
         if upper_left and lower_right:
