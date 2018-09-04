@@ -166,6 +166,15 @@ class LineSeg:
         return self.p1.distance_to(self.p2)
 
 
+@dataclass
+class Circle:
+    point: Point
+    radius: float
+
+    def intersects(self, other: 'Circle'):
+        return self.point.distance_to(other.point) <= self.radius + other.radius
+
+
 class Polygon:
     verts: List[Point]
 
