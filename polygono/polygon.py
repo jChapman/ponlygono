@@ -32,6 +32,16 @@ class Point:
     def unpack(self):
         return self.x, self.y
 
+    def rotate_about(self, about: 'Point', degrees: float) -> 'Point':
+        sin_comp = math.sin(math.radians(degrees))
+        cos_comp = math.cos(math.radians(degrees))
+        x_diff = self.x - about.x
+        y_diff = self.y - about.y
+        new_x = about.x + cos_comp * x_diff - sin_comp * y_diff
+        new_y = about.y + sin_comp * x_diff + cos_comp * y_diff
+
+        return Point(new_x, new_y)
+
 
 @dataclass
 class Line:
@@ -87,7 +97,7 @@ class Line:
         x2 = point.x + x_part
         return LineSeg(Point(x1, self.slope*x1 + self.y_intercept), Point(x2, self.slope*x2 + self.y_intercept))
     
-    def create_line_perpendicular(self, point:Point) -> 'Line':
+    def create_line_perpendicular(self, point: Point) -> 'Line':
         if self.point_is_on(point):
             return None
         if math.isinf(self.slope):
@@ -206,8 +216,11 @@ class Rect(Polygon):
             self.width = abs(upper_left.x - lower_right.x)
             self.height = abs(upper_left.y - lower_right.y)
         elif width and height:
-            super().__init__([upper_left, Point(upper_left.x, upper_left.y+height), Point(upper_left.x+width, upper_left.y+width), Point(upper_left.x+width, upper_left.y)])
+            super().__init__([upper_left, Point(upper_left.x, upper_left.y+height), Point(upper_left.x+width, upper_left.y+height), Point(upper_left.x+width, upper_left.y)])
             self.width = width
             self.height = height
-    
+
+    @property
+    def upper_left(self):
+        return self.verts[0]
 

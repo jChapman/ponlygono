@@ -8,7 +8,8 @@ def test_create_fails_with_too_many_params():
 
 
 def test_create_with_two_points():
-    assert Rect(Point(0, 0), Point(10, 10))
+    r = Rect(Point(0, 0), Point(10, 10))
+    assert len(r.verts) == 4
 
 
 def test_create_with_point_and_wh():
@@ -21,4 +22,12 @@ def test_create_square():
         assert p in r.verts
     r = Rect(Point(0, 0), Point(10, 10))
     for p in [Point(0, 0), Point(0, 10), Point(10, 10), Point(10, 0)]:
+        assert p in r.verts
+
+def test_create_rect():
+    r = Rect(Point(0, 0), width=20, height=10)
+    for p in [Point(0, 0), Point(0, 10), Point(20, 10), Point(20, 0)]:
+        assert p in r.verts
+    r = Rect(Point(0, 0), Point(20, 10))
+    for p in [Point(0, 0), Point(0, 10), Point(20, 10), Point(20, 0)]:
         assert p in r.verts
