@@ -171,9 +171,22 @@ class Circle:
     point: Point
     radius: float
 
+    @property
+    def x(self):
+        return self.point.x
+
+    @property
+    def y(self):
+        return self.point.y
+
     def intersects(self, other: 'Circle'):
         return self.point.distance_to(other.point) <= self.radius + other.radius
 
+    def make_circle_which_touches(self, angle: float, radius: float) -> 'Circle':
+        angle = math.radians(angle)
+        distance = self.radius + radius
+        new_center = Point(self.point.x + distance*math.cos(angle), self.point.y + distance*math.sin(angle))
+        return Circle(new_center, radius)
 
 class Polygon:
     verts: List[Point]
