@@ -8,5 +8,5 @@ setup (
     packages=['polygono', 'polygono.test'],
     url='',
     license='MIT',
-    long_description=open('README.txt').read(),
+    long_description=open('README').read(),
 )
