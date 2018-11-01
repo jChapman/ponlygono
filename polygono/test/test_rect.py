@@ -24,6 +24,7 @@ def test_create_square():
     for p in [Point(0, 0), Point(0, 10), Point(10, 10), Point(10, 0)]:
         assert p in r.verts
 
+
 def test_create_rect():
     r = Rect(Point(0, 0), width=20, height=10)
     for p in [Point(0, 0), Point(0, 10), Point(20, 10), Point(20, 0)]:

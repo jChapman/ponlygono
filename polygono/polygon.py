@@ -188,6 +188,9 @@ class Circle:
         new_center = Point(self.point.x + distance*math.cos(angle), self.point.y + distance*math.sin(angle))
         return Circle(new_center, radius)
 
+    def point_inside(self, point: Point) -> bool:
+        return point.distance_to(self.point) < self.radius
+
 class Polygon:
     verts: List[Point]
 
