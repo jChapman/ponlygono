@@ -1,4 +1,4 @@
-from typing import List, Iterator
+from typing import List, Iterator, Optional
 from dataclasses import dataclass
 from itertools import combinations
 import math
@@ -51,7 +51,7 @@ class Line:
     __epsilon = 0.00001
 
     @property
-    def y_intercept(self) -> float:
+    def y_intercept(self) -> Optional[float]:
         if math.isinf(self.slope):
             if self.p.x == 0:
                 return math.inf
@@ -66,7 +66,7 @@ class Line:
             return math.isinf(self.slope)
         return self.slope == (point.y - self.p.y) / x_diff
 
-    def intersection_point(self, other: 'Line') -> Point:
+    def intersection_point(self, other: 'Line') -> Optional[Point]:
         if self.is_parallel_to(other):
             # TODO this will return None if they are the same line, what is the correct value to return there? 
             return None
@@ -97,7 +97,7 @@ class Line:
         x2 = point.x + x_part
         return LineSeg(Point(x1, self.slope*x1 + self.y_intercept), Point(x2, self.slope*x2 + self.y_intercept))
     
-    def create_line_perpendicular(self, point: Point) -> 'Line':
+    def create_line_perpendicular(self, point: Point) -> Optional['Line']:
         if self.point_is_on(point):
             return None
         if math.isinf(self.slope):
@@ -116,7 +116,7 @@ class LineSeg:
     p2: Point
 
     # https://stackoverflow.com/a/39592579
-    def intersection_point(self, other: 'LineSeg') -> Point:
+    def intersection_point(self, other: 'LineSeg') -> Optional[Point]:
         denom = (other.p2.y - other.p1.y) * (self.p2.x - self.p1.x) - (other.p2.x - other.p1.x) * (self.p2.y - self.p1.y)
         if denom == 0:
             return None
@@ -150,7 +150,7 @@ class LineSeg:
 
         return Point(self.p1.x + x_total, self.p1.y + y_total)
     
-    def step_along(self, distance: float) -> Point:
+    def step_along(self, distance: float) -> Optional[Point]:
         length = self.length
         if distance > length:
             return None
@@ -247,4 +247,3 @@ class Rect(Polygon):
     @property
     def upper_left(self):
         return self.verts[0]
-
