@@ -1,0 +1,11 @@
+Polygono
+========
+A library for the creation and modification of polygons
+
+Requires Python 3.7+
+
+Examples
+--------
+
+For more examples check out the `test` directory
+
