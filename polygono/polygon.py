@@ -188,12 +188,14 @@ class Circle:
         new_center = Point(self.point.x + distance*math.cos(angle), self.point.y + distance*math.sin(angle))
         return Circle(new_center, radius)
 
+
 class Polygon:
     verts: List[Point]
 
     def __init__(self, points: List[Point]) -> None:
         if len(points) < 3 or len(points) != len(set(points)):
-            raise ValueError('Invalid points! Polygon will close the polygon for you (no need to repeat first point as last')
+            raise ValueError(
+                "Invalid points! Polygon will close the polygon for you (no need to repeat first point as last")
 
         self.verts = points
 
@@ -220,7 +222,7 @@ class Polygon:
         j = num_verts - 1
         contains = False
         while i < num_verts:
-            if (self.verts[i].y > point.y) != (self.verts[j].y > point.y) and (point.x  < (self.verts[j].x - self.verts[i].x) * (point.y - self.verts[i].y) / (self.verts[j].y - self.verts[i].y) + self.verts[i].x):
+            if (self.verts[i].y > point.y) != (self.verts[j].y > point.y) and (point.x < (self.verts[j].x - self.verts[i].x) * (point.y - self.verts[i].y) / (self.verts[j].y - self.verts[i].y) + self.verts[i].x):
                 contains = not contains
             j = i
             i += 1
