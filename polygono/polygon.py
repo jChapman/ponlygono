@@ -1,4 +1,4 @@
-from typing import List, Iterator, Optional
+from typing import List, Iterator, Optional, ClassVar
 from dataclasses import dataclass
 from itertools import combinations
 import math
@@ -9,10 +9,10 @@ class Point:
     x: float
     y: float
 
-    __epsilon = 0.00001
+    __epsilon: ClassVar[float] = 0.00001
 
-    def __eq__(self, other: 'Point') -> bool:
-        if other is None:
+    def __eq__(self, other: object) -> bool:
+        if other is None or not isinstance(other, Point):
             return False
         x_diff = self.x - other.x
         y_diff = self.y - other.y
@@ -23,12 +23,12 @@ class Point:
 
     def __neq__(self, other: 'Point') -> bool:
         return not self.__eq__(other)
-    
+
     def distance_to(self, other: 'Point') -> float:
         x_diff = self.x - other.x
         y_diff = self.y - other.y
         return math.sqrt(x_diff*x_diff + y_diff*y_diff)
-    
+
     def unpack(self):
         return self.x, self.y
 
@@ -59,7 +59,7 @@ class Line:
         return self.p.y - self.slope * self.p.x
 
     def point_is_on(self, point: Point) -> bool:
-        if point == self.p: 
+        if point == self.p:
             return True
         x_diff = point.x - self.p.x
         if x_diff == 0:
@@ -72,15 +72,15 @@ class Line:
             return None
         x = (self.y_intercept - other.y_intercept) / (self.slope - other.slope) 
         return Point(x, self.slope * x + self.y_intercept)
-    
+
     def is_parallel_to(self, other: 'Line') -> bool:
         if math.isinf(self.slope):
             return math.isinf(other.slope)
         return other.slope == self.slope
-    
+
     def create_parallel_line(self, point: Point) -> 'Line':
         return Line(point, self.slope)
-    
+
     def create_line_segment_of_length(self, length: float, point: Point = None) -> 'LineSeg':
         if point is None:
             point = self.p
@@ -91,17 +91,18 @@ class Line:
 
         if math.isinf(self.slope):
             return LineSeg(Point(point.x, point.y + half_distance), Point(point.x, point.y-half_distance))
-        
+
         x_part = half_distance / math.sqrt(1 + self.slope*self.slope)
         x1 = point.x - x_part
         x2 = point.x + x_part
+        # TODO unsafe use of y_intercept which may be None
         return LineSeg(Point(x1, self.slope*x1 + self.y_intercept), Point(x2, self.slope*x2 + self.y_intercept))
-    
+
     def create_line_perpendicular(self, point: Point) -> Optional['Line']:
         if self.point_is_on(point):
             return None
         if math.isinf(self.slope):
-            slope = 0
+            slope: float = 0
         elif abs(self.slope) < self.__epsilon:
             slope = math.inf
         else:
@@ -144,12 +145,12 @@ class LineSeg:
     def point_along(self, percent_along: float) -> Point:
         if percent_along < 0 or percent_along > 1:
             raise ValueError('Invalid percent_along (must be between 0 and 1 inclusive)')
-        
-        x_total = (self.p2.x - self.p1.x) * percent_along 
-        y_total = (self.p2.y - self.p1.y) * percent_along 
+
+        x_total = (self.p2.x - self.p1.x) * percent_along
+        y_total = (self.p2.y - self.p1.y) * percent_along
 
         return Point(self.p1.x + x_total, self.p1.y + y_total)
-    
+
     def step_along(self, distance: float) -> Optional[Point]:
         length = self.length
         if distance > length:
@@ -160,7 +161,7 @@ class LineSeg:
         x = (1-t) * self.p1.x + t * self.p2.x
         y = (1-t) * self.p1.y + t * self.p2.y
         return Point(x, y)
-        
+
     @property
     def length(self) -> float:
         return self.p1.distance_to(self.p2)
@@ -230,9 +231,9 @@ class Polygon:
         return contains
 
 
-class Rect(Polygon): 
+class Rect(Polygon):
 
-    def __init__(self, upper_left: Point, lower_right: Point=None, width: float=None, height: float=None):
+    def __init__(self, upper_left: Point, lower_right: Point = None, width: float = None, height: float = None):
         if upper_left and lower_right and (width or height):
             raise ValueError('Too many params! Either pass two points or a single point with width and height')
         if upper_left and lower_right:
